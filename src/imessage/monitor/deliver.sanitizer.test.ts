@@ -12,6 +12,10 @@ user: Sender (untrusted metadata):
 \`\`\`json
 {"name":"Tadas"}
 \`\`\`
+assistant: Attachments (untrusted metadata):
+\`\`\`json
+[{"name":"photo.jpg"}]
+\`\`\`
 After`;
 
     expect(stripVisibleUntrustedMetadataBlocks(text)).toBe("Before\n\nAfter");

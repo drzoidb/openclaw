@@ -11,15 +11,14 @@ type SentMessageCache = {
   remember: (scope: string, text: string) => void;
 };
 
-const VISIBLE_UNTRUSTED_METADATA_BLOCK_RE =
-  /(?:^|\n)(?:(?:user|system|assistant)\s*:\s*)?(?:Conversation info \(untrusted metadata\):|Sender \(untrusted metadata\):|Thread starter \(untrusted, for context\):|Replied message \(untrusted, for context\):|Forwarded message context \(untrusted metadata\):|Chat history since last reply \(untrusted, for context\):|Location \(untrusted metadata\):)\n```json\n[\s\S]*?\n```(?=\n|$)/g;
-
 export function stripVisibleUntrustedMetadataBlocks(text: string): string {
   if (!text) {
     return text;
   }
+  const visibleUntrustedMetadataBlockRe =
+    /(?:^|\n)(?:(?:user|system|assistant)\s*:\s*)?[^\n]+\((?:untrusted metadata|untrusted, for context)\):\n```json\n[\s\S]*?\n```(?=\n|$)/g;
   return text
-    .replace(VISIBLE_UNTRUSTED_METADATA_BLOCK_RE, "\n")
+    .replace(visibleUntrustedMetadataBlockRe, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
