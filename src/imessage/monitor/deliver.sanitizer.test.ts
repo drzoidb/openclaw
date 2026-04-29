@@ -24,7 +24,7 @@ After`;
   it("strips metadata fences with common markdown fence variants", () => {
     const text = `Before
   Sender (UNTRUSTED METADATA):
-~~~JSON   
+~~~ JSON   
 {"name":"Tadas"}
 ~~~   
 After`;
