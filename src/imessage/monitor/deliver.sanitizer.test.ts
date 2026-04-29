@@ -39,6 +39,17 @@ After`;
     expect(stripVisibleUntrustedMetadataBlocks(text)).toBe("Before\n\nAfter");
   });
 
+  it("strips untrusted-for-context envelopes", () => {
+    const text = `Before
+Conversation info (untrusted, for context):
+\`\`\`json
+{"chat":"private"}
+\`\`\`
+After`;
+
+    expect(stripVisibleUntrustedMetadataBlocks(text)).toBe("Before\n\nAfter");
+  });
+
   it("leaves normal text intact", () => {
     expect(stripVisibleUntrustedMetadataBlocks("hello\nworld")).toBe("hello\nworld");
   });
