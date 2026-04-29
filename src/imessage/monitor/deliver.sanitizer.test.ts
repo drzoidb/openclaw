@@ -23,10 +23,10 @@ After`;
 
   it("strips metadata fences with common markdown fence variants", () => {
     const text = `Before
-Sender (UNTRUSTED METADATA):
-\`\`\`JSON   
+  Sender (UNTRUSTED METADATA):
+~~~JSON   
 {"name":"Tadas"}
-\`\`\`   
+~~~   
 After`;
 
     expect(stripVisibleUntrustedMetadataBlocks(text)).toBe("Before\n\nAfter");
