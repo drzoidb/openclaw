@@ -20,6 +20,8 @@ import {
 } from "../shared/string-coerce.js";
 
 const CRON_WEBHOOK_TIMEOUT_MS = 10_000;
+const EMPTY_AGENT_RESPONSE_ERROR_RE =
+  /^⚠️\s*Agent couldn't generate a response\.(?:\s+Note:\s+some tool actions may have already been executed\s+—\s+please verify before retrying\.)?(?:\s+Please try again\.)?$/i;
 
 type CronLogger = {
   warn: (obj: unknown, msg?: string) => void;
@@ -42,6 +44,14 @@ function redactWebhookUrl(url: string): string {
   } catch {
     return "<invalid-webhook-url>";
   }
+}
+
+function formatCronFailureMessage(job: CronJob, error: unknown): string {
+  const errorText = typeof error === "string" && error.trim() ? error.trim() : "unknown error";
+  const visibleError = EMPTY_AGENT_RESPONSE_ERROR_RE.test(errorText)
+    ? "agent ended without a final reply"
+    : errorText;
+  return `Cron job "${job.name}" failed: ${visibleError}`;
 }
 
 function resolveCronWebhookTarget(params: {
@@ -275,7 +285,7 @@ function dispatchCronFailureDestinationNotifications(params: {
     return;
   }
 
-  const failureMessage = `Cron job "${params.job.name}" failed: ${params.evt.error ?? "unknown error"}`;
+  const failureMessage = formatCronFailureMessage(params.job, params.evt.error);
   const failureDest = resolveFailureDestination(params.job, params.globalFailureDestination);
   const deliverySessionKey = resolveCronDeliverySessionKey(params.job);
 

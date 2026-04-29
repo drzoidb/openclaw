@@ -1357,6 +1357,53 @@ describe("gateway server cron", () => {
     }
   }, 45_000);
 
+  test("uses a quiet cron failure message for empty terminal agent replies", async () => {
+    const { prevSkipCron } = await setupCronTestRun({
+      tempPrefix: "openclaw-gw-cron-empty-agent-failure-",
+      cronEnabled: false,
+    });
+
+    const { server, ws } = await startServerWithClient();
+    await connectOk(ws);
+
+    try {
+      cronIsolatedRun.mockResolvedValueOnce({
+        status: "error",
+        summary: "agent failed",
+        error:
+          "⚠️ Agent couldn't generate a response. Note: some tool actions may have already been executed — please verify before retrying.",
+      });
+      const jobId = await addWebhookCronJob({
+        ws,
+        name: "empty terminal reply",
+        sessionTarget: "isolated",
+        delivery: {
+          mode: "announce",
+          channel: "last",
+        },
+      });
+
+      const finished = waitForCronEvent(
+        ws,
+        (payload) => payload?.jobId === jobId && payload?.action === "finished",
+      );
+      await runCronJobForce(ws, jobId);
+      await finished;
+
+      expect(sendFailureNotificationAnnounceMock).toHaveBeenCalledTimes(1);
+      expect(sendFailureNotificationAnnounceMock).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.any(String),
+        jobId,
+        expect.anything(),
+        '⚠️ Cron job "empty terminal reply" failed: agent ended without a final reply',
+      );
+    } finally {
+      await cleanupCronTestRun({ ws, server, prevSkipCron });
+    }
+  }, 45_000);
+
   test("prefers sessionTarget session context for failure announcements over creator sessionKey", async () => {
     const { prevSkipCron } = await setupCronTestRun({
       tempPrefix: "openclaw-gw-cron-failure-session-target-",
