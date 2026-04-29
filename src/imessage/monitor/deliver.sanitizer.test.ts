@@ -32,6 +32,13 @@ After`;
     expect(stripVisibleUntrustedMetadataBlocks(text)).toBe("Before\n\nAfter");
   });
 
+  it("strips metadata envelopes with CRLF line endings", () => {
+    const text =
+      'Before\r\nConversation info (untrusted metadata):\r\n```json\r\n{"chat":"private"}\r\n```\r\nAfter';
+
+    expect(stripVisibleUntrustedMetadataBlocks(text)).toBe("Before\n\nAfter");
+  });
+
   it("leaves normal text intact", () => {
     expect(stripVisibleUntrustedMetadataBlocks("hello\nworld")).toBe("hello\nworld");
   });

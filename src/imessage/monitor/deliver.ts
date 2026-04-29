@@ -16,7 +16,7 @@ export function stripVisibleUntrustedMetadataBlocks(text: string): string {
     return text;
   }
   const visibleUntrustedMetadataBlockRe =
-    /(?:^|\n)(?:(?:user|system|assistant)\s*:\s*)?[^\n]+\((?:untrusted metadata|untrusted, for context)\):\n```json\s*\n[\s\S]*?\n```\s*(?=\n|$)/gi;
+    /(?:^|\r?\n)(?:(?:user|system|assistant)\s*:\s*)?[^\r\n]+\((?:untrusted metadata|untrusted, for context)\):\r?\n```json\s*\r?\n[\s\S]*?\r?\n```\s*(?=\r?\n|$)/gi;
   return text
     .replace(visibleUntrustedMetadataBlockRe, "\n")
     .replace(/\n{3,}/g, "\n\n")
